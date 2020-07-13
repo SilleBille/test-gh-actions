@@ -6,14 +6,12 @@ jobs:
 
     # Test job
     pki-tests:
-      # This job depends on the 'build' job and waits till it completes.
-      # This job needs container to be started manually, as Github provided
-      # container **does not** use /usr/bin/init as its ENTRYPOINT.
-      name: Test contents of /usr/sbin
+      strategy:
+        matrix:
+          os: ['31', '32']
       runs-on: ubuntu-latest
       steps:
-        - name: Print contents of /usr/sbin/init
-          run: ls -la /usr/sbin/
-
-        - name: Find the location of init
-          run: which init
+        - uses: actions/checkout@v2
+        - run: docker build . -t pki-image --build-arg OS_VERSION=${{ matrix.os }}
+        - run: docker images
+        - run: docker run -i --detach pki-image:latest
